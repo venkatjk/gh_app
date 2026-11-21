@@ -1,23 +1,36 @@
-name: Use GitHub App
+
+name: Checkout Private Repository
+
 on:
   workflow_dispatch:
-  
-  push:
-    paths:
-    - .github/workflows/use-github-app.yml
 
 jobs:
   checkout-other-repo:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Get Token
-      id: get_workflow_token
-      uses: peter-murray/workflow-application-token-action@v2
-      with:
-        application_id: ${{ vars.GH_APPLICATION_ID }}
-        application_private_key: ${{ secrets.GH_APPLICATION_KEY }}
-        
-    - run: | 
-        git clone "https://x:${{ steps.get_workflow_token.outputs.token }}@github.com/venkatjk/signedcommits.git"
-     
-  
+      # Step 1: Generate GitHub App token
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v2
+        with:
+          application_id: ${{ vars.GH_APPLICATION_ID }}
+          application_private_key: ${{ secrets.GH_APPLICATION_KEY }}
+
+      # Step 2: Checkout the main repository
+      - name: Checkout Main Repository
+        uses: actions/checkout@v4
+
+      # Step 3: Checkout another private repository
+      - name: Checkout Private Repository
+        uses: actions/checkout@v4
+        with:
+          repository: venkatjk/signedcommits
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          path: signedcommits
+
+      # Step 4: Verify the cloned repository
+      - name: List Repository Files
+        run: |
+          echo "Files in signedcommits:"
+          ls -la signedcommits
