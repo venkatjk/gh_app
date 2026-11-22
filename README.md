@@ -1,2 +1,2 @@
 # gh_app
-github app
+Using the GitHub App to clone to a private repo
